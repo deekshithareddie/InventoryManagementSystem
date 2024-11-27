@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.11.35431.28
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IMSWebApi", "IMSWebApi\IMSWebApi.csproj", "{6E09345A-A35F-4F68-B495-DEE8EA48084F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IMSmvc", "IMSmvc\IMSmvc.csproj", "{3999AFDA-35C9-4081-B41D-9C5A87667929}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6E09345A-A35F-4F68-B495-DEE8EA48084F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6E09345A-A35F-4F68-B495-DEE8EA48084F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6E09345A-A35F-4F68-B495-DEE8EA48084F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6E09345A-A35F-4F68-B495-DEE8EA48084F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3999AFDA-35C9-4081-B41D-9C5A87667929}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3999AFDA-35C9-4081-B41D-9C5A87667929}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3999AFDA-35C9-4081-B41D-9C5A87667929}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3999AFDA-35C9-4081-B41D-9C5A87667929}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {68A27297-4072-4330-A4FE-04B5F8B9D9B9}
+	EndGlobalSection
+EndGlobal

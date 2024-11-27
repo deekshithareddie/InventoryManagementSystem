@@ -1,0 +1,167 @@
+﻿<!--@{
+    ViewData["Title"] = "Audit Logs";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Audit Logs</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>@ViewData["Title"]</h1>-->
+<!-- Button to trigger fetching the audit logs -->
+<!--<button id="fetchAuditLogsBtn">Get Audit Logs</button>-->
+<!-- Container to display the fetched audit logs -->
+<!--<div id="auditLogContainer">-->
+<!-- Logs will be dynamically added here -->
+<!--</div>
+    <script>
+        $(document).ready(function () {
+            $('#fetchAuditLogsBtn').click(function () {
+                // AJAX call to fetch audit logs
+                $.ajax({
+                    url: 'https://localhost:7254/api/AuditLog', // Your Web API URL
+                    type: 'GET',
+                    success: function (data) {
+                        console.log("Audit Logs Data:", data); // Debugging API response
+                        if (data && data.length > 0) {
+                            let auditLogsHtml = '';
+                            data.forEach(function (log) {
+                                auditLogsHtml += `<p>
+                                    <strong>Action:</strong> ${log.action} <br>
+                                    <strong>Description:</strong> ${log.description} <br>
+                                    <strong>Date:</strong> ${log.actionDate} <br>
+                                    <strong>Supplier ID:</strong> ${log.supplierId || "N/A"} <br>
+                                    <strong>Supplier Name:</strong> ${log.supplierName || "N/A"}
+                                </p>
+                                <hr>`;
+                            });
+                            $('#auditLogContainer').html(auditLogsHtml);
+                        } else {
+                            $('#auditLogContainer').html("<p>No audit logs found.</p>");
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Error fetching audit logs:", error);
+                        alert("An error occurred while fetching audit logs.");
+                    }
+                });
+            });
+        });
+    </script>
+
+</body>
+
+</html>-->
+﻿
+@{
+    ViewData["Title"] = "Audit Logs";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Audit Logs</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+    </style>
+</head>
+<body>
+    <br />
+
+    <h1>@ViewData["Title"]</h1>
+    <br />
+
+    <!-- Button to trigger fetching the audit logs -->
+    <button id="fetchAuditLogsBtn">Get Audit Logs</button>
+    <br />
+
+    <!-- Container to display the fetched audit logs -->
+    <div id="auditLogContainer">
+        <!-- Logs will be dynamically added here -->
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            $('#fetchAuditLogsBtn').click(function () {
+                // AJAX call to fetch audit logs
+                $.ajax({
+                    url: 'https://localhost:7254/api/AuditLog', // Your Web API URL
+                    type: 'GET',
+                    success: function (data) {
+                        console.log("Audit Logs Data:", data); // Debugging API response
+                        if (data && data.length > 0) {
+                            let auditLogsHtml = `<table>
+                                                                    <thead>
+                                                                        <tr>
+                                                                            <th>Action</th>
+                                                                            <th>Description</th>
+                                                                            <th>Date</th>
+                                                                            <th>Supplier ID</th>
+                                                                            <th>Supplier Name</th>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody>`;
+
+                            // Loop through each log and append it to the table
+                            data.forEach(function (log) {
+                                auditLogsHtml += `<tr>
+                                                                        <td>${log.action}</td>
+                                                                        <td>${log.description}</td>
+                                                                        <td>${log.actionDate}</td>
+                                                                        <td>${log.supplierId || "N/A"}</td>
+                                                                        <td>${log.supplierName || "N/A"}</td>
+                                                                    </tr>`;
+                            });
+
+                            auditLogsHtml += `</tbody></table>`;
+
+                            // Display the table inside the audit log container
+                            $('#auditLogContainer').html(auditLogsHtml);
+                        } else {
+                            $('#auditLogContainer').html("<p>No audit logs found.</p>");
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Error fetching audit logs:", error);
+                        alert("An error occurred while fetching audit logs.");
+                    }
+                });
+            });
+        });
+    </script>
+
+</body>
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+</html>

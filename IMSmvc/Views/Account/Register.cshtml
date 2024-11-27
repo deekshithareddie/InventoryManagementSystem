@@ -1,0 +1,128 @@
+﻿@model IMSmvc.Models.RegisterViewModel
+
+@{
+    ViewBag.Title = "Register";
+}
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet" />
+
+<style>
+    /* Basic styling */
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        height: 100vh;
+        padding: 10px;
+        background-color: #f4f4f4;
+        background-image: url("https://img.freepik.com/free-photo/high-angle-forklift-blue-background_23-2149853122.jpg?t=st=1732540427~exp=1732544027~hmac=4e3328d577a64b50073027a467854c2db0b0c693c118cb08be583a2a41c272d6&w=740");
+        background-repeat: no-repeat;
+        background-size: cover;
+        /*        background: linear-gradient(135deg, #71b7e6, #9b59b6);*/
+    }
+
+    /* Container to position the eye icon inside the password field */
+    .password-container {
+        position: relative;
+    }
+
+    .form-control {
+        padding-right: 30px; /* Space for the eye icon */
+    }
+
+    /* Eye icon styling */
+    .toggle-password {
+        position: absolute;
+        right: 660px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+    }
+</style>
+
+<main aria-labelledby="title">
+    <h2 id="title">@ViewBag.Title</h2>
+    <br />
+
+    @using (Html.BeginForm("Register", "Account", FormMethod.Post, new { role = "form" }))
+    {
+        @Html.AntiForgeryToken()
+        <h4 style="text-decoration:underline">Create a new account.</h4>
+
+        @Html.ValidationSummary("", new { @class = "text-danger" })
+
+        <!-- Email Field -->
+        <div class="row">
+            @Html.LabelFor(m => m.Email, new { @class = "col-md-2 col-form-label" })
+            <div class="col-md-10">
+                @Html.TextBoxFor(m => m.Email, new { @class = "form-control" })
+            </div>
+        </div>
+        <br />
+        <!-- Password Field with Show/Hide functionality -->
+        <div class="row">
+            @Html.LabelFor(m => m.Password, new { @class = "col-md-2 col-form-label" })
+            <div class="col-md-10 password-container">
+                @Html.PasswordFor(m => m.Password, new { @class = "form-control", id = "Password" })
+                <span toggle="#Password" class="toggle-password fa fa-eye"></span>
+            </div>
+        </div>
+        <br />
+        <!-- Confirm Password Field with Show/Hide functionality -->
+<div class="row">
+    @Html.LabelFor(m => m.ConfirmPassword, new { @class = "col-md-2 col-form-label" })
+    <div class="col-md-10 password-container">
+        @Html.PasswordFor(m => m.ConfirmPassword, new { @class = "form-control", id = "ConfirmPassword" })
+        <span toggle="#ConfirmPassword" class="toggle-password fa fa-eye"></span>
+    </div>
+
+        <div class="row">
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" required>
+        </div>
+
+        <div class="row">
+            <label for="address">Address:</label>
+            <input type="text" id="address" name="address" required>
+        </div>
+
+    </div>
+
+    <br />
+    <!-- Submit Button -->
+    <div class="row">
+        <div class="offset-md-2 col-md-10">
+            <input type="submit" value="Register" class="btn btn-outline-dark" />
+        </div>
+    </div>
+    <br />
+    }
+    <br />
+    <br />
+    <br />
+    <br />
+    <br />
+
+</main>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+
+    <script>
+        // JavaScript to toggle password visibility
+        $(document).ready(function () {
+            // When the "eye" icon is clicked
+            $(".toggle-password").click(function () {
+                var input = $($(this).attr("toggle"));
+
+                // Toggle the input type between "password" and "text"
+                if (input.attr("type") == "password") {
+                    input.attr("type", "text");  // Show password
+                    $(this).removeClass("fa-eye").addClass("fa-eye-slash");  // Change icon to "eye-slash"
+                } else {
+                    input.attr("type", "password");  // Hide password
+                    $(this).removeClass("fa-eye-slash").addClass("fa-eye");  // Change icon to "eye"
+                }
+            });
+        });
+    </script>
+}
