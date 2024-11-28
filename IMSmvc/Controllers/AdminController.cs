@@ -13,7 +13,7 @@ namespace IMSmvc.Controllers
         //{
         //    return View();
         //}
-        public ActionResult Order()
+        public ActionResult TrackReturn()
         {
             return View();
         }
@@ -34,6 +34,10 @@ namespace IMSmvc.Controllers
         }
 
         public ActionResult AuditLog()
+        {
+            return View();
+        }
+        public ActionResult TrackStock()
         {
             return View();
         }

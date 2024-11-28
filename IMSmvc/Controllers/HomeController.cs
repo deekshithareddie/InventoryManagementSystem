@@ -59,10 +59,11 @@ namespace IMSmvc.Controllers
                 Session.Add("Role", "Supplier");
                 ViewBag.Role = "Supplier";
                 //return RedirectToAction("Product", "Supplier",new { id=userResponse.SupplierId});
+                ViewBag.Message = userResponse.SupplierId;
             }
-            ViewBag.Message = userResponse.SupplierId;
+           
             return View();
-        }
+        } 
 
     }
 }

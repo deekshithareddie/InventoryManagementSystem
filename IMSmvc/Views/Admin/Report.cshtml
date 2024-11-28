@@ -1,501 +1,5 @@
-﻿@*﻿
-    @{
-        ViewBag.Title = "Report";
-    }
-
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Report Management</title>
-        <style>
-            /* Your existing CSS styles here */
-            body {
-                font-family: Arial, sans-serif;
-                margin: 0;
-                padding: 20px;
-                /*            background-color: #f4f4f4;*/
-                background-image: url("https://img.freepik.com/premium-photo/abstract-design-elementannual-saleshopping-season-conceptmini-cart-with-colorful-paper-bag-white-wooden-table-backgroundtop-viewflat-lay_1040174-5645.jpg?ga=GA1.1.1982704250.1732540291&semt=ais_hybrid");
-                background-repeat: no-repeat;
-                background-size: cover;
-            }
-
-            h1, h2, h3 {
-                text-align: center;
-                color: navajowhite;
-            }
-
-            #OrderForm {
-                background-color: white;
-                padding: 20px;
-                border-radius: 5px;
-                box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-                max-width: 500px;
-                margin: 20px auto;
-            }
-
-            .form-group {
-                display: flex;
-                align-items: center;
-                margin-bottom: 15px;
-            }
-
-                .form-group label {
-                    flex: 0 0 30%;
-                    font-weight: bold;
-                    color: #2c3e50;
-                }
-
-                .form-group input {
-                    flex: 1;
-                    padding: 8px;
-                    border-radius: 4px;
-                    border: 1px solid #ccc;
-                }
-
-            button {
-                padding: 10px;
-                width: 100%;
-                background-color: #3498db;
-                border: none;
-                color: white;
-                cursor: pointer;
-                font-size: 16px;
-                margin-top: 10px;
-                border-radius: 4px;
-            }
-
-                button:hover {
-                    background-color: #2980b9;
-                }
-
-            #responseMessage {
-                margin-top: 20px;
-                text-align: center;
-                font-weight: bold;
-            }
-
-            #OrdersList {
-                margin-top: 30px;
-            }
-
-            table {
-                background-color: white; /* Set background color to white */
-                width: 100%;
-                border-collapse: collapse;
-                margin-top: 20px;
-                box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-            }
-
-            th, td {
-                padding: 12px;
-                text-align: left;
-                border-bottom: 1px solid #ddd;
-            }
-
-            th {
-                background-color: #2980b9;
-                color: white;
-                font-weight: bold;
-            }
-
-            tr:hover {
-                background-color: #f1f1f1;
-            }
-
-            body {
-                font-family: Arial, sans-serif;
-                margin: 0;
-                padding: 20px;
-                background-color: #f4f4f4;
-                background-image: url("https://cdn.prod.website-files.com/65cda65f0af1fe67dc20dfeb/65f2bc85b082d079e5b09490_4.png");
-                background-repeat: no-repeat;
-                background-size: cover;
-            }
-        </style>
-    </head>
-    <body>
-
-        <h1>Report Management</h1>
-
-        <label id="responseMessage"></label>
-
-        <h2>View Report</h2>
-        <br />
-        <button type="button" onclick="fetchAllReports()" style="color:antiquewhite">Get Reports</button>
-        <br />
-        <button type="button" onclick="downloadReport()" style="color:antiquewhite">Download Report</button>
-        <br />
-        <div id="ReportsList"></div>
-        <br />
-
-        <script>
-            const apiUrl = 'https://localhost:7254/api/Reports/inventoryreport';
-            let currentReports = [];
-
-            function displayMessage(message, isError = false) {
-                const responseLabel = document.getElementById("responseMessage");
-                responseLabel.style.color = isError ? "red" : "green";
-                responseLabel.textContent = message;
-            }
-
-            function fetchAllReports() {
-                fetch(apiUrl)
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Failed to fetch reports');
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        currentReports = data;  // Store the fetched reports for later download
-                        displayReports(data);
-                    })
-                    .catch(error => displayMessage(error.message, true));
-            }
-
-
-            function displayReports(reports) {
-                const reportsList = document.getElementById("ReportsList");
-
-                if (reports.length === 0) {
-                    reportsList.innerHTML = '<p>No reports found.</p>';
-                    return;
-                }
-
-                // Check if stock level is below reorder level
-                reports.forEach(report => {
-                    if (report.stockLevel < report.reorderLevel) {
-                        alert(`Warning: Stock level for product ID ${report.productId} is below the reorder level!`);
-                    }
-                });
-
-                // Display the reports in a table format
-                reportsList.innerHTML = `<br/><table>
-                <tr><th>Supplier ID</th><th>Supplier Name</th><th>Product Id</th><th>Stock Level</th><th>Re-Order Level</th><th>Quantity</th></tr>
-                ${reports.map(report => `
-                    <tr>
-                        <td>${report.supplierId}</td>
-                        <td>${report.supplierName}</td>
-                        <td>${report.productId}</td>
-                        <td>${report.stockLevel}</td>
-                        <td>${report.reorderLevel}</td>
-                        <td>${report.quantity}</td>
-                    </tr>`).join('')}
-            </table>`;
-            }
-
-            function downloadReport() {
-                if (currentReports.length === 0) {
-                    displayMessage('No reports available for download', true);
-                    return;
-                }
-
-                const headers = ['Supplier ID', 'Supplier Name', 'Product Id', 'Stock Level', 'Re-Order Level', 'Quantity'];
-                const rows = currentReports.map(report => [
-                    report.supplierId,
-                    report.supplierName,
-                    report.productId,
-                    report.stockLevel,
-                    report.reorderLevel,
-                    report.quantity
-                ]);
-
-                const csvContent = [
-                    headers.join(','),  // Add the header row
-                    ...rows.map(row => row.join(','))  // Add each row of data
-                ].join('\n');
-
-                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-                const link = document.createElement('a');
-                const url = URL.createObjectURL(blob);
-
-                link.setAttribute('href', url);
-                link.setAttribute('download', 'inventory_report.csv');
-                link.style.visibility = 'hidden';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            }
-        </script>
-    </body>
-    </html>*@
-
-
-﻿@*@{
-        ViewBag.Title = "Report";
-    }
-
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Report Management</title>
-        <style>
-            /* Your existing CSS styles here */
-            body {
-                font-family: Arial, sans-serif;
-                margin: 0;
-                padding: 20px;
-                background-image: url("https://img.freepik.com/premium-photo/abstract-design-elementannual-saleshopping-season-conceptmini-cart-with-colorful-paper-bag-white-wooden-table-backgroundtop-viewflat-lay_1040174-5645.jpg?ga=GA1.1.1982704250.1732540291&semt=ais_hybrid");
-                background-repeat: no-repeat;
-                background-size: cover;
-            }
-
-            h1 {
-                text-align: center;
-                color: black;
-            }
-            h2, h3 {
-                text-align: center;
-                color: black;
-            }
-            button {
-                padding: 10px;
-                width: 30%;
-                background-color: #3498db;
-                border: none;
-                color: white;
-                cursor: pointer;
-                font-size: 16px;
-                margin-top: 10px;
-                border-radius: 4px;
-            }
-
-                button:hover {
-                    background-color: #2980b9;
-                }
-
-            #responseMessage {
-                margin-top: 20px;
-                text-align: center;
-                font-weight: bold;
-            }
-
-            #ReportsList, #SalesReportList, #supplierPerformanceReport {
-                margin-top: 30px;
-            }
-
-            table {
-                background-color: white;
-                width: 100%;
-                border-collapse: collapse;
-                margin-top: 20px;
-                box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-            }
-
-            th, td {
-                padding: 12px;
-                text-align: left;
-                border-bottom: 1px solid #ddd;
-            }
-
-            th {
-                background-color: #2980b9;
-                color: white;
-                font-weight: bold;
-            }
-
-            tr:hover {
-                background-color: #f1f1f1;
-            }
-        </style>
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    </head>
-    <body>
-
-        <h1>Report Management</h1>
-
-        <label id="responseMessage"></label>
-
-        <h2>StockLevel Report</h2>
-        <button type="button" onclick="fetchAllReports()">StockLevel Report</button>
-        <br />
-        <button type="button" onclick="downloadReport()">Download Report</button>
-        <div id="ReportsList"></div>
-
-        <h2>Supplier Performance Report</h2>
-        <button id="getSupplierPerformanceBtn"> Supplier Performance</button>
-        <div id="supplierPerformanceReport"></div>
-
-        <h2>Sales Report Management</h2>
-        <button type="button" onclick="fetchSalesReport()">Sales Report</button>
-        <div id="SalesReportList"></div>
-
-        <script>
-            const apiUrl = 'http://localhost:5108/api/Reports/inventoryreport';  // Inventory report endpoint
-            const salesReportUrl = 'http://localhost:5108/api/Reports/salesreport';  // Sales report endpoint
-            const supplierPerformanceUrl = 'http://localhost:5108/api/Reports/supplier-performance';  // Supplier performance endpoint
-            let currentReports = [];
-            let currentSalesReport = [];
-
-            // Function to display messages
-            function displayMessage(message, isError = false) {
-                const responseLabel = document.getElementById("responseMessage");
-                responseLabel.style.color = isError ? "red" : "green";
-                responseLabel.textContent = message;
-            }
-
-            // Fetch all reports
-            function fetchAllReports() {
-                fetch(apiUrl)
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Failed to fetch reports');
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        currentReports = data;
-                        displayReports(data);
-                    })
-                    .catch(error => displayMessage(error.message, true));
-            }
-
-            // Display reports in a table
-            function displayReports(reports) {
-                const reportsList = document.getElementById("ReportsList");
-
-                if (reports.length === 0) {
-                    reportsList.innerHTML = '<p>No reports found.</p>';
-                    return;
-                }
-
-                reportsList.innerHTML = `<br/><table>
-                                                <tr><th>Supplier ID</th><th>Supplier Name</th><th>Product Id</th><th>Stock Level</th><th>Re-Order Level</th><th>Quantity</th></tr>
-                                                ${reports.map(report => `
-                                                    <tr>
-                                                        <td>${report.supplierId}</td>
-                                                        <td>${report.supplierName}</td>
-                                                        <td>${report.productId}</td>
-                                                        <td>${report.stockLevel}</td>
-                                                        <td>${report.reorderLevel}</td>
-                                                        <td>${report.quantity}</td>
-                                                    </tr>`).join('')}
-                                            </table>`;
-            }
-
-            // Download reports as CSV
-            function downloadReport() {
-                if (currentReports.length === 0) {
-                    displayMessage('No reports available for download', true);
-                    return;
-                }
-
-                const headers = ['Supplier ID', 'Supplier Name', 'Product Id', 'Stock Level', 'Re-Order Level', 'Quantity'];
-                const rows = currentReports.map(report => [
-                    report.supplierId,
-                    report.supplierName,
-                    report.productId,
-                    report.stockLevel,
-                    report.reorderLevel,
-                    report.quantity
-                ]);
-
-                const csvContent = [
-                    headers.join(','),
-                    ...rows.map(row => row.join(','))
-                ].join('\n');
-
-                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-                const link = document.createElement('a');
-                const url = URL.createObjectURL(blob);
-
-                link.setAttribute('href', url);
-                link.setAttribute('download', 'inventory_report.csv');
-                link.style.visibility = 'hidden';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            }
-
-            // Fetch sales report
-            function fetchSalesReport() {
-                fetch(salesReportUrl)
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Failed to fetch sales report');
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        currentSalesReport = data;
-                        displaySalesReport(data);
-                    })
-                    .catch(error => displayMessage(error.message, true));
-            }
-
-            // Display sales report
-            function displaySalesReport(reportData) {
-                const reportList = document.getElementById("SalesReportList");
-
-                if (reportData.length === 0) {
-                    reportList.innerHTML = '<p>No sales data found.</p>';
-                    return;
-                }
-
-                reportList.innerHTML = `<br/><table>
-                                                <tr><th>Product ID</th><th>Product Name</th><th>Total Quantity Sold</th><th>Total Revenue</th></tr>
-                                                ${reportData.map(report => `
-                                                    <tr>
-                                                        <td>${report.productId}</td>
-                                                        <td>${report.name}</td>
-                                                        <td>${report.totalQuantitySold}</td>
-                                                        <td>${report.totalRevenue.toFixed(2)}</td>
-                                                    </tr>`).join('')}
-                                            </table>`;
-            }
-
-            // Fetch supplier performance report
-            $(document).ready(function () {
-                $('#getSupplierPerformanceBtn').click(function () {
-                    $('#supplierPerformanceReport').html('<p>Loading...</p>');
-
-                    $.ajax({
-                        url: supplierPerformanceUrl,
-                        type: 'GET',
-                        success: function (data) {
-                            if (data && data.length > 0) {
-                                let reportHtml = `<h3>Supplier Performance Report:</h3><table border="1">
-                                                        <thead>
-                                                            <tr>
-                                                                <th>Supplier ID</th>
-                                                                <th>Supplier Name</th>
-                                                                <th>Total Products Supplied</th>
-                                                                <th>Top Supplier</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>`;
-
-                                data.forEach(function (supplier) {
-                                    reportHtml += `<tr>
-                                                            <td>${supplier.supplierId}</td>
-                                                            <td>${supplier.name}</td>
-                                                            <td>${supplier.totalProductsSupplied}</td>
-                                                            <td>${supplier.isTopSupplier ? 'Yes' : 'No'}</td>
-                                                        </tr>`;
-                                });
-
-                                reportHtml += `</tbody></table>`;
-                                $('#supplierPerformanceReport').html(reportHtml);
-                            } else {
-                                $('#supplierPerformanceReport').html('<p>No supplier performance data found.</p>');
-                            }
-                        },
-                        error: function () {
-                            $('#supplierPerformanceReport').html('<p>Error loading supplier performance report.</p>');
-                        }
-                    });
-                });
-            });
-        </script>
-
-    </body>
-    </html>*@
-@{
-    ViewBag.Title = "Report";
+﻿@{
+    ViewBag.Title = "Reports";
 }
 
 <!DOCTYPE html>
@@ -503,9 +7,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Report Management</title>
+    <title>Reports</title>
     <style>
-        /* Your existing CSS styles here */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -520,14 +23,12 @@
             color: black;
         }
 
-        h2, h3 {
-            text-align: center;
+        h2 {
             color: black;
         }
 
         button {
             padding: 10px;
-            width: 30%;
             background-color: #3498db;
             border: none;
             color: white;
@@ -547,7 +48,7 @@
             font-weight: bold;
         }
 
-        #ReportsList, #SalesReportList, #supplierPerformanceReport {
+        #ReportsList {
             margin-top: 30px;
         }
 
@@ -579,96 +80,98 @@
 </head>
 <body>
 
-    <h1>Report Management</h1>
+    <h1>Reports</h1>
 
-    <label id="responseMessage"></label>
+    <!-- Stock Level Report Section -->
+    <h2>Stock Level Report</h2>
+    <button type="button" onclick="fetchStockLevelReport()">Fetch Stock Level Report</button>
+    <button type="button" onclick="downloadStockLevelReport()" style="margin-left: 10px;">Download Stock Level Report</button>
+    <div id="stockLevelResponseMessage"></div>
+    <div id="stockLevelReportsList"></div>
 
-    <h2>StockLevel Report</h2>
-    <button type="button" onclick="fetchAllReports()">StockLevel Report</button>
+    <br><br>
 
-    <button type="button" onclick="downloadStockLevelReport()" style="margin-left: 70px;">Download StockLevel Report</button>
-    <div id="ReportsList"></div>
-
-    <h2>Supplier Performance Report</h2>
-    <button id="getSupplierPerformanceBtn"> Supplier Performance</button>
-
-    <!-- Add a class or inline style for spacing -->
-    <button type="button" onclick="downloadSupplierPerformanceReport()" style="margin-left: 70px;">Download Supplier Performance Report</button>
-
-    <div id="supplierPerformanceReport"></div>
-
-    <h2>Sales Report Management</h2>
-    <button type="button" onclick="fetchSalesReport()">Sales Report</button>
-
-    <button type="button" onclick="downloadSalesReport()" style="margin-left: 70px;">Download Sales Report</button>
-    <div id="SalesReportList"></div>
+    <!-- Supplier Summary Report Section -->
+    <h2>Supplier Summary Report</h2>
+    <button type="button" onclick="fetchSupplierSummary()">Fetch Supplier Summary Report</button>
+    <button type="button" onclick="downloadSupplierSummaryReport()" style="margin-left: 10px;">Download Supplier Summary Report</button>
+    <div id="supplierSummaryResponseMessage"></div>
+    <div id="supplierSummaryReportsList"></div>
 
     <script>
-        const apiUrl = 'https://localhost:7254/api/Reports/inventoryreport';  // Inventory report endpoint
-        const salesReportUrl = 'https://localhost:7254/api/Reports/salesreport';  // Sales report endpoint
-        const supplierPerformanceUrl = 'https://localhost:7254/api/Reports/supplier-performance';  // Supplier performance endpoint
-        let currentReports = [];
-        let currentSalesReport = [];
-        let currentSupplierPerformanceReport = [];
+        // API URL for stock level report
+        const apiUrlStockLevel = 'https://localhost:7254/api/Reports/stocklevelreport';
+        let stockLevelReportData = []; // Store the fetched stock level report data
 
-        // Function to display messages
-        function displayMessage(message, isError = false) {
-            const responseLabel = document.getElementById("responseMessage");
-            responseLabel.style.color = isError ? "red" : "green";
-            responseLabel.textContent = message;
+        // API URL for supplier summary report
+        const apiUrlSupplierSummary = 'https://localhost:7254/api/Reports/supplier-summary';
+        let supplierSummaryReportData = []; // Store the fetched supplier summary report data
+
+        // Function to display success or error messages
+        function displayMessage(message, isError = false, targetId) {
+            const responseMessageDiv = document.getElementById(targetId);
+            responseMessageDiv.style.color = isError ? "red" : "green";
+            responseMessageDiv.textContent = message;
         }
 
-        // Fetch all reports
-        function fetchAllReports() {
-            fetch(apiUrl)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Failed to fetch reports');
+        // Fetch Stock Level Report via AJAX
+        function fetchStockLevelReport() {
+            $.ajax({
+                url: apiUrlStockLevel,
+                type: 'GET',
+                success: function (data) {
+                    console.log('Stock Level Report Data:', data);  // Log data to check
+                    if (data && data.length > 0) {
+                        stockLevelReportData = data;  // Store the report data
+                        displayMessage('Stock level report fetched successfully!', false, 'stockLevelResponseMessage');
+                        displayStockLevelReports(data);
+                    } else {
+                        displayMessage('No stock level data available.', true, 'stockLevelResponseMessage');
                     }
-                    return response.json();
-                })
-                .then(data => {
-                    currentReports = data;
-                    displayReports(data);
-                })
-                .catch(error => displayMessage(error.message, true));
+                },
+                error: function (xhr, status, error) {
+                    displayMessage('Failed to fetch stock level report. Please try again later.', true, 'stockLevelResponseMessage');
+                }
+            });
         }
 
-        // Display reports in a table
-        function displayReports(reports) {
-            const reportsList = document.getElementById("ReportsList");
+        // Display the Stock Level Report in a table
+        function displayStockLevelReports(reports) {
+            const reportsList = document.getElementById("stockLevelReportsList");
 
-            if (reports.length === 0) {
-                reportsList.innerHTML = '<p>No reports found.</p>';
-                return;
-            }
+            let tableHTML = `<table>
+                                        <tr><th>Supplier ID</th><th>Supplier Name</th><th>Product ID</th><th>Product Name</th><th>Stock Level</th><th>Reorder Level</th><th>Quantity Ordered</th></tr>`;
 
-            reportsList.innerHTML = `<br/><table>
-                                                        <tr><th>Supplier ID</th><th>Supplier Name</th><th>Product Id</th><th>Stock Level</th><th>Re-Order Level</th><th>Quantity</th></tr>
-                                                        ${reports.map(report => `
-                                                            <tr>
-                                                                <td>${report.supplierId}</td>
-                                                                <td>${report.supplierName}</td>
-                                                                <td>${report.productId}</td>
-                                                                <td>${report.stockLevel}</td>
-                                                                <td>${report.reorderLevel}</td>
-                                                                <td>${report.quantity}</td>
-                                                            </tr>`).join('')}
-                                                    </table>`;
+            reports.forEach(report => {
+                tableHTML += `
+                            <tr>
+                                <td>${report.supplierId}</td>
+                                <td>${report.supplierName}</td>
+                                <td>${report.productId}</td>
+                                <td>${report.productName}</td>
+                                <td>${report.stockLevel}</td>
+                                <td>${report.reorderLevel}</td>
+                                <td>${report.quantity}</td>
+                            </tr>`;
+            });
+
+            tableHTML += `</table>`;
+            reportsList.innerHTML = tableHTML;
         }
 
-        // Download StockLevel Report as CSV
+        // Function to download the stock level report as CSV
         function downloadStockLevelReport() {
-            if (currentReports.length === 0) {
-                displayMessage('No StockLevel report available for download', true);
+            if (stockLevelReportData.length === 0) {
+                displayMessage('No data available to download', true, 'stockLevelResponseMessage');
                 return;
             }
 
-            const headers = ['Supplier ID', 'Supplier Name', 'Product Id', 'Stock Level', 'Re-Order Level', 'Quantity'];
-            const rows = currentReports.map(report => [
+            const headers = ['Supplier ID', 'Supplier Name', 'Product ID', 'Product Name', 'Stock Level', 'Reorder Level', 'Quantity Ordered'];
+            const rows = stockLevelReportData.map(report => [
                 report.supplierId,
                 report.supplierName,
                 report.productId,
+                report.productName,
                 report.stockLevel,
                 report.reorderLevel,
                 report.quantity
@@ -684,62 +187,67 @@
             const url = URL.createObjectURL(blob);
 
             link.setAttribute('href', url);
-            link.setAttribute('download', 'stocklevel_report.csv');
+            link.setAttribute('download', 'stock_level_report.csv');
             link.style.visibility = 'hidden';
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
         }
 
-        // Fetch sales report
-        function fetchSalesReport() {
-            fetch(salesReportUrl)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Failed to fetch sales report');
+        // Fetch Supplier Summary Report via AJAX
+        function fetchSupplierSummary() {
+            $.ajax({
+                url: apiUrlSupplierSummary,
+                type: 'GET',
+                success: function (data) {
+                    console.log('Supplier Summary Report Data:', data);  // Log data to check
+                    if (data && data.length > 0) {
+                        supplierSummaryReportData = data;  // Store the report data
+                        displayMessage('Supplier summary report fetched successfully!', false, 'supplierSummaryResponseMessage');
+                        displaySupplierSummaryReports(data);
+                    } else {
+                        displayMessage('No supplier summary data available.', true, 'supplierSummaryResponseMessage');
                     }
-                    return response.json();
-                })
-                .then(data => {
-                    currentSalesReport = data;
-                    displaySalesReport(data);
-                })
-                .catch(error => displayMessage(error.message, true));
+                },
+                error: function (xhr, status, error) {
+                    displayMessage('Failed to fetch supplier summary report. Please try again later.', true, 'supplierSummaryResponseMessage');
+                }
+            });
         }
 
-        // Display sales report
-        function displaySalesReport(reportData) {
-            const reportList = document.getElementById("SalesReportList");
+        // Display the Supplier Summary Report in a table
+        function displaySupplierSummaryReports(reports) {
+            const reportsList = document.getElementById("supplierSummaryReportsList");
 
-            if (reportData.length === 0) {
-                reportList.innerHTML = '<p>No sales data found.</p>';
+            let tableHTML = `<table>
+                                            <tr><th>Supplier ID</th><th>Supplier Name</th><th>Total Quantity</th><th>Total Revenue</th></tr>`;
+
+            reports.forEach(report => {
+                tableHTML += `
+                                <tr>
+                                    <td>${report.supplierId}</td>
+                                    <td>${report.supplierName}</td>
+                                    <td>${report.totalQuantity}</td>
+                                    <td>${report.totalRevenue.toFixed(2)}</td>
+                                </tr>`;
+            });
+
+            tableHTML += `</table>`;
+            reportsList.innerHTML = tableHTML;
+        }
+
+        // Function to download the supplier summary report as CSV
+        function downloadSupplierSummaryReport() {
+            if (supplierSummaryReportData.length === 0) {
+                displayMessage('No data available to download', true, 'supplierSummaryResponseMessage');
                 return;
             }
 
-            reportList.innerHTML = `<br/><table>
-                                                        <tr><th>Product ID</th><th>Product Name</th><th>Total Quantity Sold</th><th>Total Revenue</th></tr>
-                                                        ${reportData.map(report => `
-                                                            <tr>
-                                                                <td>${report.productId}</td>
-                                                                <td>${report.name}</td>
-                                                                <td>${report.totalQuantitySold}</td>
-                                                                <td>${report.totalRevenue.toFixed(2)}</td>
-                                                            </tr>`).join('')}
-                                                    </table>`;
-        }
-
-        // Download Sales Report as CSV
-        function downloadSalesReport() {
-            if (currentSalesReport.length === 0) {
-                displayMessage('No Sales report available for download', true);
-                return;
-            }
-
-            const headers = ['Product ID', 'Product Name', 'Total Quantity Sold', 'Total Revenue'];
-            const rows = currentSalesReport.map(report => [
-                report.productId,
-                report.name,
-                report.totalQuantitySold,
+            const headers = ['Supplier ID', 'Supplier Name', 'Total Quantity', 'Total Revenue'];
+            const rows = supplierSummaryReportData.map(report => [
+                report.supplierId,
+                report.supplierName,
+                report.totalQuantity,
                 report.totalRevenue.toFixed(2)
             ]);
 
@@ -753,83 +261,7 @@
             const url = URL.createObjectURL(blob);
 
             link.setAttribute('href', url);
-            link.setAttribute('download', 'sales_report.csv');
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-
-        // Fetch supplier performance report
-        $(document).ready(function () {
-            $('#getSupplierPerformanceBtn').click(function () {
-                $('#supplierPerformanceReport').html('<p>Loading...</p>');
-
-                $.ajax({
-                    url: supplierPerformanceUrl,
-                    type: 'GET',
-                    success: function (data) {
-                        currentSupplierPerformanceReport = data;
-                        if (data && data.length > 0) {
-                            let reportHtml = `<h3>Supplier Performance Report:</h3><table border="1">
-                                                                <thead>
-                                                                    <tr>
-                                                                        <th>Supplier ID</th>
-                                                                        <th>Supplier Name</th>
-                                                                        <th>Total Products Supplied</th>
-                                                                        <th>Top Supplier</th>
-                                                                    </tr>
-                                                                </thead>
-                                                                <tbody>`;
-
-                            data.forEach(function (supplier) {
-                                reportHtml += `<tr>
-                                                                    <td>${supplier.supplierId}</td>
-                                                                    <td>${supplier.name}</td>
-                                                                    <td>${supplier.totalProductsSupplied}</td>
-                                                                    <td>${supplier.isTopSupplier ? 'Yes' : 'No'}</td>
-                                                                </tr>`;
-                            });
-
-                            reportHtml += `</tbody></table>`;
-                            $('#supplierPerformanceReport').html(reportHtml);
-                        } else {
-                            $('#supplierPerformanceReport').html('<p>No supplier performance data found.</p>');
-                        }
-                    },
-                    error: function () {
-                        $('#supplierPerformanceReport').html('<p>Error loading supplier performance report.</p>');
-                    }
-                });
-            });
-        });
-
-        // Download Supplier Performance Report as CSV
-        function downloadSupplierPerformanceReport() {
-            if (currentSupplierPerformanceReport.length === 0) {
-                displayMessage('No Supplier Performance report available for download', true);
-                return;
-            }
-
-            const headers = ['Supplier ID', 'Supplier Name', 'Total Products Supplied', 'Top Supplier'];
-            const rows = currentSupplierPerformanceReport.map(supplier => [
-                supplier.supplierId,
-                supplier.name,
-                supplier.totalProductsSupplied,
-                supplier.isTopSupplier ? 'Yes' : 'No'
-            ]);
-
-            const csvContent = [
-                headers.join(','),
-                ...rows.map(row => row.join(','))
-            ].join('\n');
-
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            const url = URL.createObjectURL(blob);
-
-            link.setAttribute('href', url);
-            link.setAttribute('download', 'supplier_performance_report.csv');
+            link.setAttribute('download', 'supplier_summary_report.csv');
             link.style.visibility = 'hidden';
             document.body.appendChild(link);
             link.click();
@@ -839,3 +271,4 @@
 
 </body>
 </html>
+

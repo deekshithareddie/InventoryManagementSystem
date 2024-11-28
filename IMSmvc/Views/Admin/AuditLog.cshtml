@@ -65,6 +65,15 @@
     <title>Audit Logs</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-image: url("https://cdn.shopify.com/s/files/1/1246/6441/articles/3PL_inventory_management_2.png?v=1727354630");
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
@@ -81,8 +90,13 @@
         }
 
         th {
-            background-color: #4CAF50;
+            background-color: blueviolet;
             color: white;
+        }
+
+        td {
+            background-color: antiquewhite;
+            color: black;
         }
 
         tr:hover {
@@ -116,26 +130,26 @@
                         console.log("Audit Logs Data:", data); // Debugging API response
                         if (data && data.length > 0) {
                             let auditLogsHtml = `<table>
-                                                                    <thead>
-                                                                        <tr>
-                                                                            <th>Action</th>
-                                                                            <th>Description</th>
-                                                                            <th>Date</th>
-                                                                            <th>Supplier ID</th>
-                                                                            <th>Supplier Name</th>
-                                                                        </tr>
-                                                                    </thead>
-                                                                    <tbody>`;
+                                                                        <thead>
+                                                                            <tr>
+                                                                                <th>Action</th>
+                                                                                <th>Description</th>
+                                                                                <th>Date</th>
+                                                                                <th>Supplier ID</th>
+                                                                                <th>Supplier Name</th>
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody>`;
 
                             // Loop through each log and append it to the table
                             data.forEach(function (log) {
                                 auditLogsHtml += `<tr>
-                                                                        <td>${log.action}</td>
-                                                                        <td>${log.description}</td>
-                                                                        <td>${log.actionDate}</td>
-                                                                        <td>${log.supplierId || "N/A"}</td>
-                                                                        <td>${log.supplierName || "N/A"}</td>
-                                                                    </tr>`;
+                                                                            <td>${log.action}</td>
+                                                                            <td>${log.description}</td>
+                                                                            <td>${log.actionDate}</td>
+                                                                            <td>${log.supplierId || "N/A"}</td>
+                                                                            <td>${log.supplierName || "N/A"}</td>
+                                                                        </tr>`;
                             });
 
                             auditLogsHtml += `</tbody></table>`;

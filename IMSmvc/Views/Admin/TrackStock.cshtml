@@ -1,0 +1,256 @@
+﻿
+@{
+    ViewBag.Title = "StockTracking";
+}
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Management</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-image: url("https://img.freepik.com/premium-photo/smart-warehouse-inventory-management-system-concept-manager-using-digital-tablet-showing-warehouse-software-management-dashboard-blurred-warehouse-as-background_114016-20887.jpg");
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+
+        h1, h2 {
+            text-align: center;
+            color: antiquewhite;
+        }
+
+        #OrderForm {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            margin: 20px auto;
+        }
+
+        .form-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+            .form-group label {
+                flex: 0 0 30%;
+                font-weight: bold;
+                color: #2c3e50;
+            }
+
+            .form-group input,
+            .form-group select {
+                flex: 1;
+                padding: 8px;
+                border-radius: 4px;
+                border: 1px solid #ccc;
+            }
+
+        button {
+            padding: 10px;
+            width: 100%;
+            background-color: #3498db;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+            border-radius: 4px;
+        }
+
+            button:hover {
+                background-color: #2980b9;
+            }
+
+        #responseMessage {
+            margin-top: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        #OrdersList {
+            margin-top: 30px;
+        }
+
+        table {
+            background-color: white;
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #2980b9;
+            color: white;
+            font-weight: bold;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Stock Management</h1>
+
+
+    <button type="button" onclick="fetchAllOrders()">Get Stock Details</button>
+
+    <div id="responseMessage"></div>
+
+    <div id="OrdersList"></div>
+
+    <h2>Stock Tracking</h2>
+    <button type="button" onclick="checkStock()">Check Total Stock</button>
+
+    <div id="TotalStock"></div>
+
+    <script>
+        const apiUrl = 'https://localhost:7254/api/Orders'; // Adjust API URL accordingly
+        let completedOrders = [];  // Array to hold all completed orders
+        const productQuantities = {};  // Object to store the total quantity per productId
+        const reorderLevel = 10;  // Define the reorder level for triggering popup
+
+        function displayMessage(message, isError = false) {
+            const responseLabel = document.getElementById("responseMessage");
+            responseLabel.style.color = isError ? "red" : "green";
+            responseLabel.textContent = message;
+        }
+
+        // Fetching all orders from the API
+        function fetchAllOrders() {
+            console.log('Fetching orders...');
+            fetch(apiUrl)
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Orders fetched:', data);
+                    // Only keep completed orders
+                    completedOrders = data.filter(order => order.status === 'completed');
+                    console.log('Completed Orders:', completedOrders); // Check completed orders
+                    calculateTotalQuantities();  // Calculate total quantities for completed orders
+                    displayOrders(data);  // Display all orders in the table
+                })
+                .catch(error => {
+                    console.error('Error fetching orders:', error);
+                    displayMessage('There is an error fetching orders.', true);
+                });
+        }
+
+        // Calculate total quantity per productId from completed orders
+        function calculateTotalQuantities() {
+            completedOrders.forEach(order => {
+                if (!productQuantities[order.productId]) {
+                    productQuantities[order.productId] = 0;
+                }
+                productQuantities[order.productId] += order.quantity;
+            });
+        }
+
+        // Displaying orders in a table
+        function displayOrders(orders) {
+            const ordersList = document.getElementById("OrdersList");
+            let ordersTable = `<h3>Order List:</h3><table>
+                                        <tr><th>Order ID</th><th>Product ID</th><th>Quantity</th><th>Order Date</th><th>Status</th></tr>`;
+
+            orders.forEach(order => {
+                ordersTable += `
+                            <tr id="order-${order.orderId}">
+                                <td>${order.orderId}</td>
+                                <td>${order.productId}</td>
+                                <td>${order.quantity}</td>
+                                <td>${order.orderDate}</td>
+                                <td>${order.status}</td>
+                            </tr>`;
+            });
+
+            ordersTable += `</table>`;
+            ordersList.innerHTML = ordersTable;
+        }
+
+        // Function to check stock for completed orders and display total quantity per product
+        function checkStock() {
+            if (completedOrders.length === 0) {
+                displayMessage('No completed orders found to check stock.', true);
+                return;
+            }
+
+            // Display the total quantity for each productId in a table format
+            let totalStockHtml = "<h3>Total stock present in eack product:</h3><table><tr><th>Product ID</th><th>Total Quantity</th><th>User Input</th><th>Stock Updation</th></tr>";
+
+            // Loop through the productQuantities object and display the result with input and subtract button
+            for (let productId in productQuantities) {
+                totalStockHtml += `
+                            <tr id="product-${productId}">
+                                <td>${productId}</td>
+                                <td id="total-${productId}">${productQuantities[productId]}</td>
+                                <td><input type="number" id="subtract-input-${productId}" value="0" min="0" /></td>
+                                <td><button onclick="subtractQuantity(${productId})">Update Stock</button></td>
+                            </tr>`;
+            }
+
+            totalStockHtml += "</table>";
+            document.getElementById("TotalStock").innerHTML = totalStockHtml;
+        }
+
+        // Function to subtract the quantity from the total and update the table
+        function subtractQuantity(productId) {
+            const subtractInput = document.getElementById(`subtract-input-${productId}`);
+            const subtractValue = parseInt(subtractInput.value, 10);
+
+            if (isNaN(subtractValue) || subtractValue < 0) {
+                displayMessage('Please enter a valid positive number for subtraction.', true);
+                return;
+            }
+
+            if (subtractValue > productQuantities[productId]) {
+                displayMessage('Cannot subtract more than the total quantity.', true);
+                return;
+            }
+
+            // Subtract the quantity from the product's total quantity
+            productQuantities[productId] -= subtractValue;
+
+            // Update the displayed total quantity in the table
+            document.getElementById(`total-${productId}`).textContent = productQuantities[productId];
+
+            // Check if the product's quantity is below the reorder level
+            if (productQuantities[productId] < reorderLevel) {
+                showReorderPopup(productId, productQuantities[productId]);
+            }
+
+            // Clear the input field after subtraction
+            subtractInput.value = "0";
+
+            // Optionally, you can update the message to show success
+            displayMessage(`Successfully subtracted ${subtractValue} from product ID ${productId}.`, false);
+        }
+
+        // Function to show a popup if the quantity goes below reorder level
+        function showReorderPopup(productId, newQuantity) {
+            // Create and display the popup
+            alert(`Warning: Product ID ${productId} has fallen below the reorder level! New Quantity: ${newQuantity}`);
+        }
+    </script>
+
+
+</body>
+</html>
+
+
